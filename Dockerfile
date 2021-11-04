@@ -7,12 +7,14 @@ ARG PYTHON_VERSION=3.8
 # and https://forums.docker.com/t/multiple-projects-stopped-building-on-docker-hub-operation-not-permitted/92570/11
 FROM python:${PYTHON_VERSION}-slim-buster AS base
 WORKDIR /app
-RUN apt-get update -qqy && apt-get install -qqy gcc libc-dev
 
 # build typed-ast in separate stage because it requires gcc and libc-dev
 FROM base AS python-deps
 COPY requirements.txt ./
+RUN apt-get update -qqy && apt-get install -qqy gcc libc-dev default-jdk-headless
 RUN pip install -r requirements.txt
+COPY java-requirements.txt ./
+RUN pip install -r java-requirements.txt
 
 # download java dependencies in separate stage because it requires maven and jdk for jni access to zetasql
 FROM base AS java-deps
@@ -20,8 +22,6 @@ FROM base AS java-deps
 RUN mkdir -p /usr/share/man/man1 && apt-get update -qqy && apt-get install -qqy maven default-jdk-headless
 COPY pom.xml ./
 RUN mvn dependency:copy-dependencies
-COPY java-requirements.txt ./
-RUN pip install -r java-requirements.txt
 
 FROM base
 # add bash for entrypoint
