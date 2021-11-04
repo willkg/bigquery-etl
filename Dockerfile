@@ -10,22 +10,22 @@ WORKDIR /app
 
 # build typed-ast in separate stage because it requires gcc and libc-dev
 FROM base AS python-deps
-COPY requirements.txt ./
 RUN apt-get update -qqy && apt-get install -qqy gcc libc-dev default-jdk-headless
-RUN pip install -r requirements.txt
 COPY java-requirements.txt ./
 RUN pip install -r java-requirements.txt
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
 
-# download java dependencies in separate stage because it requires maven and jdk for jni access to zetasql
+# download java dependencies in separate stage because it requires maven
 FROM base AS java-deps
 # man directory is removed in upstream debian:buster-slim, but needed by jdk install
-RUN mkdir -p /usr/share/man/man1 && apt-get update -qqy && apt-get install -qqy maven default-jdk-headless
+RUN mkdir -p /usr/share/man/man1 && apt-get update -qqy && apt-get install -qqy maven
 COPY pom.xml ./
 RUN mvn dependency:copy-dependencies
 
 FROM base
-# add bash for entrypoint
-RUN mkdir -p /usr/share/man/man1 && apt-get update -qqy && apt-get install -qqy bash
+# add bash for entrypoint and jdk for jni access to zetasql
+RUN mkdir -p /usr/share/man/man1 && apt-get update -qqy && apt-get install -qqy bash default-jdk-headless
 COPY --from=google/cloud-sdk:alpine /google-cloud-sdk /google-cloud-sdk
 ENV PATH /google-cloud-sdk/bin:$PATH
 COPY --from=java-deps /app/target/dependency /app/target/dependency
