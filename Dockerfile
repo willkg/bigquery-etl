@@ -7,25 +7,25 @@ ARG PYTHON_VERSION=3.8
 # and https://forums.docker.com/t/multiple-projects-stopped-building-on-docker-hub-operation-not-permitted/92570/11
 FROM python:${PYTHON_VERSION}-slim-buster AS base
 WORKDIR /app
+RUN apt-get update -qqy && apt-get install -qqy gcc libc-dev
 
 # build typed-ast in separate stage because it requires gcc and libc-dev
 FROM base AS python-deps
-RUN apt-get update -qqy && apt-get install -qqy gcc libc-dev
-COPY java-requirements.txt ./
-RUN pip install -r java-requirements.txt
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-# download java dependencies in separate stage because it requires maven
+# download java dependencies in separate stage because it requires maven and jdk for jni access to zetasql
 FROM base AS java-deps
 # man directory is removed in upstream debian:buster-slim, but needed by jdk install
-RUN mkdir -p /usr/share/man/man1 && apt-get update -qqy && apt-get install -qqy maven
+RUN mkdir -p /usr/share/man/man1 && apt-get update -qqy && apt-get install -qqy maven default-jdk-headless
 COPY pom.xml ./
 RUN mvn dependency:copy-dependencies
+COPY java-requirements.txt ./
+RUN pip install -r java-requirements.txt
 
 FROM base
-# add bash for entrypoint and jdk for jni access to zetasql
-RUN mkdir -p /usr/share/man/man1 && apt-get update -qqy && apt-get install -qqy bash default-jdk-headless
+# add bash for entrypoint
+RUN mkdir -p /usr/share/man/man1 && apt-get update -qqy && apt-get install -qqy bash
 COPY --from=google/cloud-sdk:alpine /google-cloud-sdk /google-cloud-sdk
 ENV PATH /google-cloud-sdk/bin:$PATH
 COPY --from=java-deps /app/target/dependency /app/target/dependency
