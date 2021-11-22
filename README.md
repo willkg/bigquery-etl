@@ -420,6 +420,12 @@ Contributing
 
 When adding or modifying a query in this repository, make your changes in the `sql/` directory.
 
+If updating schemas associated with certain restricted-access datasets (specified in
+`CODEOWNERS`), a CODEOWNER (usually SRE) will automatically be assigned to review the PR. Please
+follow [these additional instructions](https://docs.google.com/document/d/1TTJi4ht7NuzX6BPG_KTr6omaZg70cEpxe9xlpfnHj9k/edit#heading=h.ttegrcfy18ck)
+for PRs referencing these schemas. The CODEOWNER will be responsible for
+merging the PR once it has been approved.
+
 When adding a new library to the Python requirements, first add the library to
 the requirements and then add any meta-dependencies into constraints.
 Constraints are discovered by installing requirements into a fresh virtual
@@ -468,3 +474,4 @@ Tests
 [spark-bigquery-connector]: https://github.com/GoogleCloudPlatform/spark-bigquery-connector/issues/5
 [reserved keywords]: https://cloud.google.com/bigquery/docs/reference/standard-sql/lexical#reserved-keywords
 [mozilla-pipeline-schemas]: https://github.com/mozilla-services/mozilla-pipeline-schemas
+[change control procedure]: https://docs.google.com/document/d/1TTJi4ht7NuzX6BPG_KTr6omaZg70cEpxe9xlpfnHj9k/edit#heading=h.ttegrcfy18ck
