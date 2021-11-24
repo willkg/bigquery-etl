@@ -5,5 +5,5 @@ Checklist for reviewer:
 in the logs of the `manual-trigger-required-for-fork` CI task together with more detailed instructions.
 - [ ] If adding a new field to a query, ensure that the schema and dependent downstream schemas have been updated
 
-For modifications to schemas in restricted namespaces (see `CODEOWNERS`:
-- [ ] Follow the change control procedure in https://docs.google.com/document/d/1TTJi4ht7NuzX6BPG_KTr6omaZg70cEpxe9xlpfnHj9k/edit#heading=h.ttegrcfy18ck
+For modifications to schemas in restricted namespaces (see [`CODEOWNERS`](/CODEOWNERS)):
+- [ ] Follow the [change control procedure](https://docs.google.com/document/d/1TTJi4ht7NuzX6BPG_KTr6omaZg70cEpxe9xlpfnHj9k/edit#heading=h.ttegrcfy18ck)
