@@ -1,11 +1,13 @@
 #!/usr/bin/env python
+"""Generate SQL."""
 
 import os
+import re
 import shutil
-import yaml
 from pathlib import Path
 
 import jinja2
+import yaml
 
 VIEW_TEMPLATE = """CREATE OR REPLACE VIEW
   `{{ view_name }}`
@@ -31,20 +33,24 @@ for project in os.listdir("./definitions"):
             table_path = dataset_path / "tables"
             latest_table_name = None
             # FIXME: this sorting won't work for versions greater than 10
-            for table_version in sorted(os.listdir(table_path)):
-                table_id = dataset + "_" + table_version
+            # FIXME: bug - generates nested directories /search/search_derived/
+            # eg. search_clients_engines_sources../tables/search_clients_daily_v8
+            for directory_name in sorted(os.listdir(table_path)):
+                if re.match("^v[0-9]+", directory_name):
+                    table_id = dataset + "_" + directory_name
+                else:
+                    table_id = directory_name
                 output_dir = base_output_dir / f"{namespace}_derived" / table_id
                 # copy the query
                 os.makedirs(output_dir, exist_ok=True)
                 shutil.copyfile(
-                    table_path / table_version / "query.sql", output_dir / "query.sql"
+                    table_path / directory_name / "query.sql", output_dir / "query.sql"
                 )
                 # merge table-specific metadata with dataset metadata
                 table_metadata = yaml.safe_load(
-                    open(table_path / table_version / "metadata.yaml").read()
+                    open(table_path / directory_name / "metadata.yaml").read()
                 )
                 merged_metadata = {**dataset_metadata, **table_metadata}
-                del merged_metadata["entrypoint"]
                 open(output_dir / "metadata.yaml", "w").write(
                     yaml.dump(merged_metadata)
                 )
@@ -59,7 +65,8 @@ for project in os.listdir("./definitions"):
                     # views are templatized and take two parameters:
                     #   - source_name (name of the table to be queried)
                     #   - view_name (name of the view)
-                    # both of these are generated automatically, based on the version of the view
+                    # both of these are generated automatically,
+                    # based on the version of the view
                     view_id = f"{dataset}_{view_version}"
                     table_name = (
                         f"{project}.{namespace}_derived.{dataset}_{view_version}"

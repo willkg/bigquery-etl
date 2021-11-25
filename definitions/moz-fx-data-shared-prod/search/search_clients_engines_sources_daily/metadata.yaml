@@ -1,0 +1,7 @@
+friendly_name: Search Clients Daily
+description: |
+  A daily aggregate of desktop searches per (client_id, engine, source).
+
+  Exposed to users as view `search.search_clients_engines_sources_daily`.
+owners:
+- akomar@mozilla.com
