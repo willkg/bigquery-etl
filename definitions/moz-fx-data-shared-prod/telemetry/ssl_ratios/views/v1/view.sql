@@ -1,12 +1,12 @@
 CREATE OR REPLACE VIEW
-  `{{ view_name }}`
+  `moz-fx-data-shared-prod.telemetry.ssl_ratios_v1`
 AS
 WITH windowed AS (
   SELECT
     *,
     SUM(ssl_loads) OVER w1 + SUM(non_ssl_loads) OVER w1 AS total_loads
   FROM
-    `{{ table_name }}`
+    `moz-fx-data-shared-prod.telemetry_derived.ssl_ratios_v1`
   WINDOW
     w1 AS (
       ORDER BY
